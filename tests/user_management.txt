@@ -1,0 +1,39 @@
+1. AUTH & USER MANAGEMENT
+1.1 Register Admin
+POST /auth/register
+
+{
+  "email": "admin@example.com",
+  "password": "Admin123!",
+  "name": "System Admin",
+}
+
+
+1.2 Login
+POST /auth/login
+ye
+{
+  "email": "admin@example.com",
+  "password": "Admin123!"
+}
+
+
+1.3 Create Staff User
+POST /users
+{
+  "email": "staff1@example.com",
+  "password": "Staff123!",
+  "name": "Warehouse Staff",
+  "role": "STAFF"
+}
+
+
+1.4 Staff cannot create users
+STAFF POST /user → Forbidden (403)
+
+{
+  "email": "staff2@example.com",
+  "password": "Staff123!",
+  "name": "Another Staff",
+  "role": "STAFF"
+}

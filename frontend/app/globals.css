@@ -1,0 +1,154 @@
+/* INTER FONT */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* Tailwind v4 core */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Custom Dark Mode Variant */
+@custom-variant dark (&:is(.dark *));
+
+/* -------------------------------------------------------
+   THEME MAPPING – required for tailwind v4 tokens
+-------------------------------------------------------- */
+@theme inline {
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  /* Base tokens mapped to CSS variables */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* -------------------------------------------------------
+   XSTOCK DARK THEME VARIABLES
+-------------------------------------------------------- */
+
+:root {
+  --background: #050608;
+  --foreground: #f5f5f5;
+
+  --card: #0b0c11;
+  --card-foreground: #f5f5f5;
+
+  --border: #23252d;
+  --input: #111217;
+  --ring: #24c98b;
+
+  --primary: #24c98b;
+  --primary-foreground: #0c0f0c;
+
+  --accent: rgba(36, 201, 139, 0.12);
+  --accent-foreground: #24c98b;
+
+  --destructive: #dc2626;
+  --destructive-border: #7f1d1d;
+  --destructive-foreground: #fca5a5;
+
+  --radius: 0.5rem;
+}
+
+/* -------------------------------------------------------
+   DARK MODE OVERRIDES (if .dark class is applied)
+-------------------------------------------------------- */
+.dark {
+  --background: #050608;
+  --foreground: #f5f5f5;
+
+  --card: #0c0d12;
+  --card-foreground: #fafafa;
+
+  --border: #2c2f38;
+  --input: #121318;
+
+  --primary: #24c98b;
+  --primary-foreground: #000;
+
+  --accent: rgba(36, 201, 139, 0.12);
+  --accent-foreground: #24c98b;
+}
+
+/* -------------------------------------------------------
+   BASE LAYER (applies Tailwind utilities to HTML)
+-------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    background: radial-gradient(circle at top, #141721 0, #050608 55%);
+  }
+}
+
+/* -------------------------------------------------------
+   STATUS BANNERS (error/success/info)
+-------------------------------------------------------- */
+
+@layer components {
+  .banner-base {
+    @apply rounded-md border p-2 text-xs font-medium;
+  }
+
+  .banner-error {
+    border-color: var(--destructive-border);
+    background-color: color-mix(in srgb, var(--destructive) 10%, transparent);
+    color: var(--destructive-foreground);
+  }
+
+  .banner-success {
+    border-color: #14532d;
+    background-color: rgba(34, 197, 94, 0.12);
+    color: #4ade80;
+  }
+
+  .banner-info {
+    border-color: #1e40af;
+    background-color: rgba(59, 130, 246, 0.12);
+    color: #93c5fd;
+  }
+}
+
+/* -------------------------------------------------------
+   SMOOTH SCROLLBAR
+-------------------------------------------------------- */
+
+html {
+  scrollbar-gutter: stable;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.input-style {
+  @apply w-full rounded-lg p-2.5 text-sm bg-[#0e0f13] border border-[#1c1d22] 
+         focus:border-white outline-none font-mono;
+}

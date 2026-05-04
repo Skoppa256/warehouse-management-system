@@ -1,0 +1,70 @@
+CREATE PO
+POST /purchase-order
+
+{
+  "supplierId": "9df129e4-e270-439b-92cf-de1310cb82f8",
+  "expectedDate": "2025-12-20T00:00:00.000Z"
+}
+
+ADD ITEM TO PO
+POST /purchase-order/{poId}/item
+
+{
+  "productId": "16d53f5b-0cf2-40fb-b07c-36255b7b9fa1",
+  "quantity": 100,
+  "unitPrice": 15000
+}
+
+APPROVE PO
+POST /purchase-order/{poId}/approve
+
+{}
+
+this will set PO.status -> pending 
+
+STARTTT INBOUND PROCESSSSSS
+POST /inbound/start
+
+{
+  "purchaseOrderId": "poId"
+}
+
+ADD INBOUND LINE
+POST /inbound/{grId}/line
+
+{
+  "purchaseOrderItemId": "PO-ITEM-ID",
+  "productId": "PRODUCT-ID",
+  "batchNumber": "BATCH-001",
+  "locationId": "LOCATION-ID-HERE",
+  "quantity": 50
+}
+
+FINALIZE INBOUND WITHOUT STOCKPOST
+POST /inbound/{grId}/finalize
+
+{
+  "autoPostStock": false
+}
+
+this will:
+1. fnialize GR (status -> received)
+2. not update inventory
+3. not write stock movement
+
+FINALIZE INBOUND WITH STOCKPOST
+
+{
+  "autoPostStock": true
+}
+
+this will:
+1. finalize GR
+2. auto create stock movement
+3. update inventory
+
+CHECK INVENTORY UPDATED
+GET /inventory?productId=X&batchId=Y&locationId=Z
+
+CHECK STOCK MOVEMENTS
+GET /stock-movement?referenceId={grId}

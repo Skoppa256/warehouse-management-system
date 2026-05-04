@@ -1,0 +1,258 @@
+{
+  "users": [
+    {
+      "id": "4c2e76ad-bd7e-4fe3-b420-4c97ba738cee",
+      "name": "Manager",
+      "email": "manager@gmail.com",
+      "password": "$2b$10$hNsT/vfw/M51KBUE4eQuY.X5nkYoKww9S/23OBct3j/k7DsRp191e",
+      "role": "MANAGER",
+      "createdAt": "2025-12-10T01:29:02.567Z",
+      "updatedAt": "2025-12-10T01:30:34.196Z"
+    },
+    {
+      "id": "466f3c73-5dbd-4c9b-ae12-7b2952983c06",
+      "name": "Admin",
+      "email": "admin@gmail.com",
+      "password": "$2b$10$rFxeZfiSUNcPh01cQ05CkO/QrNqE6WQHYp1ThuFJn5LeRfP7Z6Fs.",
+      "role": "ADMIN",
+      "createdAt": "2025-12-10T01:30:21.584Z",
+      "updatedAt": "2025-12-10T01:30:44.796Z"
+    },
+    {
+      "id": "119c1117-3b6a-47e4-8cd1-6ad6a426d318",
+      "name": "Kresna",
+      "email": "whalee524@gmail.com",
+      "password": "$2b$10$AB4strhtS0yhILqNEIecse.mZwbglDdytoOTDC/fo0Ne205VSXAge",
+      "role": "ADMIN",
+      "createdAt": "2025-12-10T01:33:46.306Z",
+      "updatedAt": "2025-12-10T01:33:56.653Z"
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "a87af50d-92c6-4ba4-81b4-d8bfd931b382",
+      "code": "SUP-COC",
+      "name": "Coca-Cola Europacific Partners Indonesia",
+      "contact": "Damian Paul",
+      "email": "contact@cocacola.com",
+      "phone": "021-57958888",
+      "address": "Jl. Rungkut Industri I No.27",
+      "isActive": true,
+      "imagePath": "/uploads/image-1765330820835-274472080.png",
+      "createdAt": "2025-12-10T01:41:56.122Z",
+      "updatedAt": "2025-12-10T01:41:56.122Z"
+    },
+    {
+      "id": "6d2c2fe7-96cc-47c6-aeaa-3ce3a0509e87",
+      "code": "SUP- PT",
+      "name": " PT. Bailey Safiri Mandiri",
+      "contact": "Andrew W.",
+      "email": "contact@baileys.com",
+      "phone": "031-8899889",
+      "address": "Green Office Park, BSD City",
+      "isActive": true,
+      "imagePath": "/uploads/image-1765330954120-247437893.webp",
+      "createdAt": "2025-12-10T01:43:15.071Z",
+      "updatedAt": "2025-12-10T01:43:15.071Z"
+    },
+    {
+      "id": "232a7bc7-320a-4320-ac5b-425be8bb6b8e",
+      "code": "SUP-PT ",
+      "name": "PT Indofood Sukses Makmur Tbk",
+      "contact": "Antoni Salim",
+      "email": "sales@indofood.co.id",
+      "phone": "021-57958888",
+      "address": "Sudirman Plaza, Jakarta Selatan",
+      "isActive": true,
+      "imagePath": "/uploads/image-1765331025478-915681431.webp",
+      "createdAt": "2025-12-10T01:44:13.113Z",
+      "updatedAt": "2025-12-10T01:44:13.113Z"
+    },
+    {
+      "id": "1d8c6a00-867a-4042-8a4a-87f5fa220ca2",
+      "code": "SUP-UNI",
+      "name": "Unilever Indonesia Tbk",
+      "contact": "Bradley",
+      "email": "corporate@unilever.com",
+      "phone": "021-80828888",
+      "address": "Jl. M.H. Thamrin No. 51, Jakarta Pusat",
+      "isActive": true,
+      "imagePath": "/uploads/image-1765331080187-279525468.png",
+      "createdAt": "2025-12-10T01:46:25.117Z",
+      "updatedAt": "2025-12-10T01:46:25.117Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "1173eafc-0e3d-4f77-be4c-6f57c7e5a85e",
+      "name": "a",
+      "sku": "PRD-A",
+      "category": "Seafood",
+      "brand": null,
+      "uom": "G",
+      "imagePath": "/uploads/image-1765330455335-8249555.png",
+      "lowStockThreshold": 11,
+      "isDeleted": true,
+      "createdAt": "2025-12-10T01:34:20.456Z",
+      "updatedAt": "2025-12-10T01:34:23.711Z"
+    },
+    {
+      "id": "6d4611ce-ecd1-4f6f-bebf-5c7eede1c4e4",
+      "name": "Indomie",
+      "sku": "PRD-IND",
+      "category": "General",
+      "brand": null,
+      "uom": "BOX",
+      "imagePath": "/uploads/image-1765330481382-25798209.png",
+      "lowStockThreshold": 50,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T01:36:25.432Z",
+      "updatedAt": "2025-12-10T01:36:25.432Z"
+    },
+    {
+      "id": "64a2c6d2-12d3-4716-b37b-dfd7e38600da",
+      "name": "Aqua Mineral Water",
+      "sku": "PRD-AQU",
+      "category": "Beverages",
+      "brand": null,
+      "uom": "BOTTLE",
+      "imagePath": "/uploads/image-1765330611443-951426860.jpg",
+      "lowStockThreshold": 50,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T01:37:30.224Z",
+      "updatedAt": "2025-12-10T01:37:30.224Z"
+    },
+    {
+      "id": "cf6557c3-f1f0-4430-89e1-b7a1ccad3c22",
+      "name": "Baileys Espresso Creme",
+      "sku": "PRD-BAI",
+      "category": "Beverages",
+      "brand": null,
+      "uom": "BOTTLE",
+      "imagePath": "/uploads/image-1765330668078-926429164.jpg",
+      "lowStockThreshold": 30,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T01:38:08.984Z",
+      "updatedAt": "2025-12-10T01:38:08.984Z"
+    },
+    {
+      "id": "2ef8c97b-355c-44b7-badc-0b0f5e7a5605",
+      "name": "Coca-cola",
+      "sku": "PRD-COC",
+      "category": "Beverages",
+      "brand": null,
+      "uom": "BOTTLE",
+      "imagePath": "/uploads/image-1765330754193-17666233.jpg",
+      "lowStockThreshold": 50,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T01:39:27.613Z",
+      "updatedAt": "2025-12-10T01:39:27.613Z"
+    },
+    {
+      "id": "4e7f5c0e-72b5-4f00-9391-e3a017548af8",
+      "name": "Promina Puffs",
+      "sku": "PRD-PRO",
+      "category": "Snacks",
+      "brand": null,
+      "uom": "PCS",
+      "imagePath": "/uploads/image-1765339944990-243109048.jpg",
+      "lowStockThreshold": 50,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T04:12:43.946Z",
+      "updatedAt": "2025-12-10T04:12:43.946Z"
+    },
+    {
+      "id": "8a2a45fd-0fc6-4847-85b6-448887a8ded5",
+      "name": "Chitato",
+      "sku": "PRD-CHI",
+      "category": "Snacks",
+      "brand": null,
+      "uom": "PCS",
+      "imagePath": "/uploads/image-1765339999111-877849820.jpg",
+      "lowStockThreshold": 50,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T04:14:00.194Z",
+      "updatedAt": "2025-12-10T04:14:00.194Z"
+    },
+    {
+      "id": "7a452979-f886-4040-a80f-2fbf852f20be",
+      "name": "Oreo",
+      "sku": "PRD-ORE",
+      "category": "Snacks",
+      "brand": null,
+      "uom": "PCS",
+      "imagePath": "/uploads/image-1765340300134-123961181.jpg",
+      "lowStockThreshold": 40,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T04:18:31.666Z",
+      "updatedAt": "2025-12-10T04:18:31.666Z"
+    },
+    {
+      "id": "7b3c458e-7d26-42ce-a83e-fb2a1673370c",
+      "name": "Jinro Peach",
+      "sku": "PRD-JIN",
+      "category": "Beverages",
+      "brand": null,
+      "uom": "BOTTLE",
+      "imagePath": "/uploads/image-1765340345986-582624962.webp",
+      "lowStockThreshold": 20,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T04:19:17.890Z",
+      "updatedAt": "2025-12-10T04:19:17.890Z"
+    },
+    {
+      "id": "a077a587-e4fd-4634-a0e7-a452d4904595",
+      "name": "Fanta",
+      "sku": "PRD-FAN",
+      "category": "Beverages",
+      "brand": null,
+      "uom": "BOTTLE",
+      "imagePath": "/uploads/image-1765340401661-216526597.jpg",
+      "lowStockThreshold": 50,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T04:20:14.659Z",
+      "updatedAt": "2025-12-10T04:20:14.659Z"
+    },
+    {
+      "id": "1ee7a8b6-f85e-47c8-abe2-c69ee5aea978",
+      "name": "Sprite",
+      "sku": "PRD-SPR",
+      "category": "Beverages",
+      "brand": null,
+      "uom": "BOTTLE",
+      "imagePath": "/uploads/image-1765340424082-478934270.jpg",
+      "lowStockThreshold": 50,
+      "isDeleted": false,
+      "createdAt": "2025-12-10T04:20:37.318Z",
+      "updatedAt": "2025-12-10T04:20:37.318Z"
+    }
+  ],
+  "customers": [
+    {
+      "id": "2cf6578d-6261-4429-a51b-3bc5c26486fe",
+      "code": "CUST-001",
+      "name": "Sumber Makmur",
+      "contact": "Henry",
+      "email": "tokosumbermakmur@gmail.com",
+      "phone": "0812-3399-2211",
+      "address": "Jl. Diponegoro",
+      "isActive": true,
+      "imagePath": "/uploads/image-1765331243174-274737587.jpg",
+      "createdAt": "2025-12-10T01:48:07.174Z",
+      "updatedAt": "2025-12-10T01:48:07.174Z"
+    },
+    {
+      "id": "da0c8836-66a1-4669-896c-ebb4b40874b7",
+      "code": "CUST-002",
+      "name": "PT Maju Bersama Retail",
+      "contact": "Aliong",
+      "email": "purchasing@majubersama.com",
+      "phone": "031-7855566",
+      "address": "Jl. Ahmad Yani",
+      "isActive": true,
+      "imagePath": "/uploads/image-1765331306590-253176958.png",
+      "createdAt": "2025-12-10T01:49:03.402Z",
+      "updatedAt": "2025-12-10T01:49:03.402Z"
+    }
+  ]
+}

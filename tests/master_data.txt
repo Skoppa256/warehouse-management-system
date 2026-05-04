@@ -1,0 +1,150 @@
+2. MASTER DATA: SUPPLIER, CUSTOMER, PRODUCT, SECTION, LOCATION, BATCH
+Supplier
+2.1 Create Supplier
+POST /supplier
+{
+  "code": "SUP-001",
+  "name": "Ocean Fresh Fisheries",
+  "contact": "Mr. Whale",
+  "email": "contact@oceanfresh.com",
+  "phone": "+62-812-8888-9999",
+  "address": "jl. cooking cooking"
+}
+
+2.2 Get All Suppliers
+GET /supplier
+
+2.3 Get Supplier by ID
+GET /supplier/{id}
+
+
+2.4 Update Supplier
+PATCH /supplier/{id}
+
+{
+  "contact": "Mr. Whale",
+  "address": "jl. cooking cooking grrr"
+}
+
+2.5 Soft Delete Supplier
+DELETE /supplier/{id}
+
+if supplier deleted -> only admin can see the supplier, other than that supplier not found
+
+
+
+Customer
+2.6 Create Customer
+POST /customer
+
+{
+  "code": "CUS-001",
+  "name": "Bluefin Markets",
+  "contact": "Ms. Luna",
+  "email": "luna@bluefin.com",
+  "phone": "+62-811-5555-2222",
+  "address": "Jl. Pasar Ikan No. 45, Jakarta"
+}
+
+
+2.7 List Customers
+GET /customer
+
+2.8 Get Customer
+GET /customer/{id}
+
+2.9 Update Customer
+PATCH /customer/{id}
+
+{
+  "name": "Bluefin Wholesale Market",
+  "phone": "+62-811-5555-9999"
+}
+
+
+2.10 Soft Delete Customer
+DELETE /customer/{id}
+
+if customer deleted -> only admin can see the customer, other than that customer not found
+
+
+
+Product
+2.11 Create Product
+POST /products
+
+{
+  "name": "Frozen Tuna Fillet",
+  "sku": "PRD-001",
+  "category": "Seafood",
+  "brand": "OceanFresh",
+  "uom": "KG",
+  "imagePath": "/images/products/tuna.png",
+  "lowStockThreshold": 10
+}
+
+{
+  "name": "Dry Rice Bag",
+  "sku": "PRD-002",
+  "category": "Grains",
+  "uom": "BAG",
+  "lowStockThreshold": 5
+}
+
+2.12 Query Products
+GET /products
+
+2.13 Update Product
+PATCH /products/{id}
+
+{
+  "brand": "BlueWave Premium",
+  "lowStockThreshold": 20
+}
+
+{
+  "name": "Frozen Tuna Steak",
+  "sku": "PRD-001A",
+  "uom": "KG"
+}
+
+
+2.14 Disable Product
+DELETE /products/{id}
+
+
+
+Section / Location
+2.15 Create Section
+POST /sections
+
+{
+  "code": "SEC-001",
+  "description": "Frozen Storage Section"
+}
+
+
+2.16 Create Location inside section
+POST /sections/{sectionid}/location
+
+Top-Level Location
+{
+  "code": "LOC-001",
+  "type": "BIN",
+}
+
+
+Child Location
+{
+  "code": "LOC-001-A",
+  "type": "SLOT",
+  "parentLocationId": "location-id-of-parent"
+}
+
+
+2.17 Soft Delete Section
+DELETE /sections/{sectionId}
+
+2.18 Ensure cannot delete Section with active Locations
+Batch
+DELETE /sections/{sectionId}    (amang)

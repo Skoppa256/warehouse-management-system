@@ -1,0 +1,474 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//  Enums
+enum UserRole {
+  ADMIN
+  STAFF
+  MANAGER
+  VIEWER
+}
+
+enum MovementType {
+  IN
+  OUT
+  TRANSFER
+  ADJUSTMENT
+}
+
+enum LocationType {
+  SECTION
+  BIN
+}
+
+enum OrderStatus {
+  DRAFT
+  PENDING
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELLED
+}
+
+enum SalesOrderStatus {
+  DRAFT
+  PENDING
+  PARTIALLY_SHIPPED
+  SHIPPED
+  CANCELLED
+}
+
+enum ShipmentStatus {
+  DRAFT
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum ReferenceType {
+  PURCHASE_ORDER
+  SALES_ORDER
+  SHIPMENT
+  GOODS_RECEIPT
+  STOCK_ADJUSTMENT
+  CYCLE_COUNT
+  MANUAL
+}
+
+enum AttachmentEntityType {
+  PRODUCT
+  PRODUCT_BATCH
+  PURCHASE_ORDER
+  SALES_ORDER
+  SHIPMENT
+  STOCK_ADJUSTMENT
+  CYCLE_COUNT
+  OTHER
+}
+
+enum UOM {
+  PCS // individual unit
+  BOX // carton/box containing multiple pcs
+  BOTTLE // bottle-type aahh
+  G // grams 
+  ML // liquid volume
+}
+
+enum GoodsReceiptStatus {
+  DRAFT
+  PENDING
+  RECEIVED
+  CANCELLED
+}
+
+//  Core Users
+model User {
+  id       String   @id @default(uuid())
+  name     String
+  email    String   @unique
+  password String
+  role     UserRole @default(STAFF)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  movements StockMovement[]
+  stockAdjustments StockAdjustment[] @relation("AdjustmentCreatedBy")
+  goodsReceiptsReceived GoodsReceipt[] @relation("GoodsReceiptReceivedBy")
+  goodsReceiptsFinalized GoodsReceipt[] @relation("GoodsReceiptFinalizedBy")
+
+
+  approvedPurchaseOrders PurchaseOrder[] @relation("PurchaseOrderApprovedBy")
+  createdPOs  PurchaseOrder[] @relation("PurchaseOrderCreatedBy")
+  salesOrders SalesOrder[] @relation("SalesOrderCreatedBy")
+  shipments Shipment[] @relation("ShipmentCreatedBy")
+}
+
+
+//  Section Structure
+model Section {
+  id          String  @id @default(uuid())
+  code        String
+  description String?
+
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  locations Location[]
+}
+
+model Location {
+  id               String       @id @default(uuid())
+  code             String
+  type             LocationType
+  sectionId        String
+
+  isActive         Boolean      @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Section that this BIN (Location) belongs to 
+  section Section @relation(fields: [sectionId], references: [id])
+
+  // Inventory stored in this BIN (Location)
+  inventory Inventory[]
+
+  // Stock movements from this location
+  movementsFrom StockMovement[] @relation("MovementFromLocation")
+
+  // Stock movements that were moved into this location
+  movementsTo StockMovement[] @relation("MovementToLocation")
+
+  // Adjustments done at this BIN (Location)
+  stockAdjustments StockAdjustment[]
+
+  // GRN lines stored into this location
+  goodsReceiptLines GoodsReceiptLine[]
+
+  // Shipment lines picked from this location
+  shipmentLines          ShipmentLine[]
+
+  @@unique([code, sectionId])
+}
+
+//  Product & Inventory
+model Product {
+  id        String  @id @default(uuid())
+  name      String
+  sku       String  @unique
+  category  String
+  brand     String?
+  uom       UOM
+  imagePath String?
+
+  lowStockThreshold Int     @default(10)
+  isDeleted         Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  batches                ProductBatch[]
+  inventory              Inventory[]
+  poItems                PurchaseOrderItem[]
+  soItems                SalesOrderItem[]
+  stockMovements         StockMovement[]
+  stockAdjustments       StockAdjustment[]
+  goodsReceiptLines      GoodsReceiptLine[]
+  shipmentLines          ShipmentLine[]
+}
+
+model ProductBatch {
+  id          String   @id @default(uuid())
+  batchNumber String
+  productId   String
+  expiryDate  DateTime
+  receivedAt  DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  isDeleted Boolean @default(false)
+  notes     String?
+
+  product                Product                 @relation(fields: [productId], references: [id])
+  inventory              Inventory[]
+  stockMovements         StockMovement[]
+  receiptLines           GoodsReceiptLine[]
+  shipmentLines          ShipmentLine[]
+  stockAdjustments       StockAdjustment[]
+
+  @@unique([batchNumber, productId])
+  @@index([expiryDate])
+  @@index([productId])
+}
+
+model Inventory {
+  id          String @id @default(uuid())
+  productId   String
+  batchId     String
+  locationId  String
+  quantity    Int
+  reservedQty Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product                Product                 @relation(fields: [productId], references: [id])
+  batch                  ProductBatch            @relation(fields: [batchId], references: [id])
+  location               Location                @relation(fields: [locationId], references: [id])
+  movements              StockMovement[]
+
+  @@unique([productId, batchId, locationId])
+  @@index([locationId])
+}
+
+//  Stock Movements & Lock
+model StockMovement {
+  id       String       @id @default(uuid())
+  type     MovementType
+  quantity Int
+  reason   String?
+
+  referenceType ReferenceType?
+  referenceId   String?
+
+  productId      String
+  batchId        String
+  inventoryId    String?
+  fromLocationId String?
+  toLocationId   String?
+
+  userId    String?
+  createdAt DateTime @default(now())
+
+  product   Product      @relation(fields: [productId], references: [id])
+  batch     ProductBatch @relation(fields: [batchId], references: [id])
+  inventory Inventory?   @relation(fields: [inventoryId], references: [id])
+
+  fromLocation Location? @relation("MovementFromLocation", fields: [fromLocationId], references: [id])
+  toLocation   Location? @relation("MovementToLocation", fields: [toLocationId], references: [id])
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([type])
+  @@index([createdAt])
+  @@index([fromLocationId])
+  @@index([toLocationId])
+  @@index([referenceType, referenceId])
+}
+
+model MovementLock {
+  id        String   @id @default(uuid())
+  batchId   String   @unique
+  createdAt DateTime @default(now())
+}
+
+//  Partners: Supplier/Customer
+model Supplier {
+  id       String  @id @default(uuid())
+  code     String  @unique
+  name     String
+  contact  String?
+  email    String?
+  phone    String?
+  address  String?
+  isActive Boolean @default(true)
+  imagePath String?
+
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  purchaseOrders PurchaseOrder[]
+}
+
+model Customer {
+  id       String  @id @default(uuid())
+  code     String  @unique
+  name     String
+  contact  String?
+  email    String?
+  phone    String?
+  address  String?
+  isActive Boolean @default(true)
+  imagePath String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  salesOrders SalesOrder[]
+}
+
+//  Inbound (PO/GRN)
+model PurchaseOrder {
+  id           String      @id @default(uuid())
+  orderNumber  String      @unique
+  supplierId   String
+  status       OrderStatus @default(PENDING)
+  orderDate    DateTime    @default(now())
+  expectedDate DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id])
+
+  items         PurchaseOrderItem[]
+  goodsReceipts GoodsReceipt[]
+
+  createdBy String
+  createdByUser User @relation("PurchaseOrderCreatedBy", fields: [createdBy], references: [id])
+
+  approvedBy String?
+  approvedAt DateTime?
+  approvedByUser   User? @relation("PurchaseOrderApprovedBy", fields: [approvedBy], references: [id])
+}
+
+
+model PurchaseOrderItem {
+  id              String  @id @default(uuid())
+  purchaseOrderId String
+  productId       String
+  quantity        Int
+  unitPrice       Decimal @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  product       Product       @relation(fields: [productId], references: [id])
+
+  receiptLines GoodsReceiptLine[]
+}
+
+model GoodsReceipt {
+  id              String             @id @default(uuid())
+  receiptNumber   String             @unique
+  purchaseOrderId String
+  receivedById    String?
+  receivedAt      DateTime           @default(now())
+  status          GoodsReceiptStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  finalizedById String?
+  finalizedAt DateTime?
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
+  receivedBy    User?         @relation("GoodsReceiptReceivedBy", fields: [receivedById], references: [id])
+  finalizedBy User? @relation("GoodsReceiptFinalizedBy", fields: [finalizedById], references: [id])
+
+  lines GoodsReceiptLine[]
+}
+
+model GoodsReceiptLine {
+  id                  String @id @default(uuid())
+  goodsReceiptId      String
+  purchaseOrderItemId String
+  productId           String
+  batchId             String
+  locationId          String
+  quantity            Int
+
+  goodsReceipt      GoodsReceipt      @relation(fields: [goodsReceiptId], references: [id])
+  purchaseOrderItem PurchaseOrderItem @relation(fields: [purchaseOrderItemId], references: [id])
+  product           Product           @relation(fields: [productId], references: [id])
+  batch             ProductBatch      @relation(fields: [batchId], references: [id])
+  location          Location          @relation(fields: [locationId], references: [id])
+}
+
+//  Outbound (SO/Ship)
+model SalesOrder {
+  id          String           @id @default(uuid())
+  orderNumber String           @unique
+  customerId  String
+  status      SalesOrderStatus @default(DRAFT)
+  orderDate   DateTime         @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customer Customer @relation(fields: [customerId], references: [id])
+
+  items     SalesOrderItem[]
+  shipments Shipment[]
+
+  userId String?
+  user   User? @relation("SalesOrderCreatedBy", fields: [userId], references: [id])
+}
+
+
+model SalesOrderItem {
+  id           String  @id @default(uuid())
+  salesOrderId String
+  productId    String
+  quantity     Int
+  unitPrice    Decimal @db.Decimal(12, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
+  product    Product    @relation(fields: [productId], references: [id])
+
+  shipmentLines ShipmentLine[]
+}
+
+model Shipment {
+  id             String         @id @default(uuid())
+  shipmentNumber String         @unique
+  salesOrderId   String
+  status         ShipmentStatus @default(DRAFT)
+  shippedAt      DateTime?
+  deliveredAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  salesOrder SalesOrder @relation(fields: [salesOrderId], references: [id])
+
+  lines  ShipmentLine[]
+
+  userId String?
+  user   User? @relation("ShipmentCreatedBy", fields: [userId], references: [id])
+}
+
+
+model ShipmentLine {
+  id               String @id @default(uuid())
+  shipmentId       String
+  salesOrderItemId String
+  productId        String
+  batchId          String
+  fromLocationId   String
+  quantity         Int
+
+  shipment       Shipment       @relation(fields: [shipmentId], references: [id])
+  salesOrderItem SalesOrderItem @relation(fields: [salesOrderItemId], references: [id])
+  product        Product        @relation(fields: [productId], references: [id])
+  batch          ProductBatch   @relation(fields: [batchId], references: [id])
+  fromLocation   Location       @relation(fields: [fromLocationId], references: [id])
+}
+
+//  Adjustments & Counts
+model StockAdjustment {
+  id             String         @id @default(uuid())
+  reason         String?
+  productId      String
+  batchId        String
+  locationId     String
+  quantityDelta  Int
+
+  createdAt   DateTime @default(now())
+  createdById String?
+
+  product         Product          @relation(fields: [productId], references: [id])
+  batch           ProductBatch     @relation(fields: [batchId], references: [id])
+  location        Location         @relation(fields: [locationId], references: [id])
+  createdBy       User?            @relation("AdjustmentCreatedBy", fields: [createdById], references: [id])
+}

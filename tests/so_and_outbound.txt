@@ -1,0 +1,56 @@
+CREATE SALES ORDER
+POST /sales-order
+
+{
+  "customerId": "cc5a02cc-6d32-488a-ba1b-188ba8b96186",
+  "expectedDate": "2025-12-20"
+}
+
+ADD SO ITEM
+POST /sales-order/{soId}/item
+
+{
+  "productId": "16d53f5b-0cf2-40fb-b07c-36255b7b9fa1",
+  "quantity": 20,
+  "unitPrice": 30000
+}
+
+{
+  "productId": "26a2a53d-4ff1-4f96-b361-a015cd965472",
+  "quantity": 200,
+  "unitPrice": 100000
+}
+
+APPROVE SO
+POST /sales-order/{soId}/approve
+
+{}
+
+START OUTBOUND
+POST /shipment
+
+{
+  "salesOrderId": "3c89d99c-57aa-465a-87bb-269dccef2012"
+}
+
+ADD SHIPMENT LINE
+POST /shipment/{shipId}/line
+
+{
+  "salesOrderItemId": "9a42712f-918a-41e4-bd74-6e89385a713d",
+  "quantity": 5
+}
+
+{
+  "salesOrderItemId": "ff4570da-166e-455c-82f1-4e0a8c0bb249",
+  "quantity": 3
+}
+
+SHIP SHIPMENT
+POST /shipment/:id/ship
+
+DELIVER SHIPMENT
+POST /shipment/:id/deliver
+
+CANCEL SHIPMENT
+POST /shipment/:id/cancel
