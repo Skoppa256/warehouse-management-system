@@ -34,6 +34,8 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3001);
+  // Bind host is configurable so production can listen on loopback (127.0.0.1)
+  // behind a reverse proxy. Defaults to 0.0.0.0 to preserve local-dev behaviour.
+  await app.listen(process.env.PORT ?? 3001, process.env.HOST ?? '0.0.0.0');
 }
 bootstrap();

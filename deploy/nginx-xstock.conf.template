@@ -1,0 +1,37 @@
+# xStock reverse proxy — rendered into /etc/nginx/sites-available/xstock by
+# deploy/nginx-setup.sh. Placeholders (__VAR__) are filled from xstock.env.
+# Certbot will add the TLS (443) server block + HTTP->HTTPS redirect on top.
+server {
+    listen 80;
+    listen [::]:80;
+    server_name __WMS_DOMAIN__;
+
+    # Product / supplier / customer image uploads go through here.
+    client_max_body_size 25m;
+
+    # ---- API + uploaded files -> NestJS backend --------------------------
+    # The frontend calls https://__WMS_DOMAIN__/api/...  ; we strip the /api
+    # prefix so the backend sees its real routes (/auth, /products, /uploads…).
+    location /api/ {
+        proxy_pass http://127.0.0.1:__BACKEND_PORT__/;
+        proxy_http_version 1.1;
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+
+    # ---- Everything else -> Next.js frontend -----------------------------
+    location / {
+        proxy_pass http://127.0.0.1:__FRONTEND_PORT__;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade           $http_upgrade;
+        proxy_set_header Connection        "upgrade";
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+    }
+}

@@ -1,0 +1,4 @@
+# Secrets and machine-local state — never commit these.
+xstock.env
+.runtime
+*.bak.*
