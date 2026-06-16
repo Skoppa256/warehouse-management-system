@@ -34,6 +34,9 @@ const backendEnv = parseEnv(path.join(APP_DIR, 'backend', '.env'));
 
 const FRONTEND_PORT = cfg.FRONTEND_PORT || '3100';
 const BACKEND_PORT = cfg.BACKEND_PORT || '3101';
+// Interface the frontend binds to. Default loopback; set FRONTEND_HOST=0.0.0.0 in
+// xstock.env when a reverse proxy in Docker must reach it via the host gateway.
+const FRONTEND_HOST = cfg.FRONTEND_HOST || '127.0.0.1';
 
 module.exports = {
   apps: [
@@ -57,7 +60,7 @@ module.exports = {
       name: cfg.PM2_FRONTEND_NAME || 'xstock-frontend',
       cwd: path.join(APP_DIR, 'frontend'),
       script: 'node_modules/next/dist/bin/next',
-      args: `start -H 127.0.0.1 -p ${FRONTEND_PORT}`,
+      args: `start -H ${FRONTEND_HOST} -p ${FRONTEND_PORT}`,
       exec_mode: 'fork',
       instances: 1,
       autorestart: true,
