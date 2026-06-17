@@ -37,6 +37,7 @@ const BACKEND_PORT = cfg.BACKEND_PORT || '3101';
 // Interface the frontend binds to. Default loopback; set FRONTEND_HOST=0.0.0.0 in
 // xstock.env when a reverse proxy in Docker must reach it via the host gateway.
 const FRONTEND_HOST = cfg.FRONTEND_HOST || '127.0.0.1';
+const BACKEND_HOST = cfg.BACKEND_HOST || '127.0.0.1';
 
 module.exports = {
   apps: [
@@ -53,7 +54,7 @@ module.exports = {
         ...backendEnv,
         NODE_ENV: 'production',
         PORT: BACKEND_PORT,
-        HOST: '127.0.0.1',
+        HOST: BACKEND_HOST,
       },
     },
     {
