@@ -6,7 +6,7 @@ import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { api } from "@/lib/api";
-import { API_BASE_URL } from "@/lib/config";
+import ProductImage from "@/components/ui/product-image";
 import { useApi } from "@/lib/use-api";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -81,17 +81,12 @@ export default function ProductsPage() {
                   onClick={() => router.push(`/products/${p.id}`)}
                 >
                   {/* Image */}
-                  {p.imagePath ? (
-                    <img
-                      src={`${API_BASE_URL}${p.imagePath}`}
-                      alt={p.name}
-                      className="w-full h-32 object-cover rounded-lg mb-4"
-                    />
-                  ) : (
-                    <div className="w-full h-32 bg-[var(--muted)] rounded-lg mb-4 flex items-center justify-center text-[var(--muted-foreground)] text-sm">
-                      No image
-                    </div>
-                  )}
+                  <ProductImage
+                    imagePath={p.imagePath}
+                    alt={p.name}
+                    className="w-full h-32 rounded-lg mb-4"
+                    iconSize={36}
+                  />
 
                   {/* Info */}
                   <div className="space-y-1">
