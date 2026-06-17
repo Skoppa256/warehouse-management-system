@@ -6,7 +6,7 @@ import DashboardShell from "@/components/layout/dashboard-shell";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
 import { api } from "@/lib/api";
-import { API_BASE_URL } from "@/lib/config";
+import ProductImage from "@/components/ui/product-image";
 import { Product } from "@/lib/types";
 import LoadingState from "@/components/ui/loading-state";
 import EmptyState from "@/components/ui/empty-state";
@@ -121,17 +121,12 @@ export default function ProductDetailPage() {
 
           {/* IMAGE BLOCK */}
           <Card className="p-4 flex items-center justify-center h-72">
-            {product.imagePath ? (
-              <img
-                src={`${API_BASE_URL}${product.imagePath}`}
-                alt={product.name}
-                className="w-full h-full object-cover rounded-xl"
-              />
-            ) : (
-              <div className="w-full h-full rounded-xl bg-[var(--muted)] border border-[var(--border)] flex items-center justify-center">
-                <span className="text-[var(--muted-foreground)] text-sm">No image</span>
-              </div>
-            )}
+            <ProductImage
+              imagePath={product.imagePath}
+              alt={product.name}
+              className="w-full h-full rounded-xl"
+              iconSize={40}
+            />
           </Card>
 
           {/* DETAILS BLOCK */}

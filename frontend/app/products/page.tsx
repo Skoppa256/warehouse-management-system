@@ -1,40 +1,43 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import DashboardShell from "@/components/layout/dashboard-shell";
 import Card from "@/components/ui/card";
 import Button from "@/components/ui/button";
+import { api } from "@/lib/api";
+import ProductImage from "@/components/ui/product-image";
+import { Product } from "@/lib/types";
 import LoadingState from "@/components/ui/loading-state";
 import EmptyState from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
 import { useConfirm } from "@/components/ui/confirm-dialog";
-import { Pencil, Trash2, Plus } from "lucide-react";
-import { api } from "@/lib/api";
-import { API_BASE_URL } from "@/lib/config";
-import { Product } from "@/lib/types";
+import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { useRole } from "@/lib/roles";
 
-export default function ProductsPage() {
+export default function ProductDetailPage() {
   const router = useRouter();
+  const params = useParams();
+  const productId = params?.id as string;
   const toast = useToast();
   const confirm = useConfirm();
   const { can } = useRole();
-  const [products, setProducts] = useState<Product[]>([]);
+
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function loadProducts() {
+  async function loadProduct() {
     try {
-      const data = await api("/products");
-      setProducts(Array.isArray(data) ? data : []);
+      const data = await api(`/products/${productId}`);
+      setProduct(data);
     } catch (err) {
-      console.error("Product API error:", err);
-      setProducts([]);
+      console.error("Product detail fetch error:", err);
     }
     setLoading(false);
   }
 
-  async function deleteProduct(product: Product) {
+  async function deleteProduct() {
+    if (!product) return;
     const ok = await confirm({
       title: `Delete ${product.name}?`,
       description: "This removes the product permanently. This can't be undone.",
@@ -42,7 +45,7 @@ export default function ProductsPage() {
       tone: "danger",
       onConfirm: async () => {
         try {
-          await api(`/products/${product.id}`, { method: "DELETE" });
+          await api(`/products/${productId}`, { method: "DELETE" });
         } catch {
           throw new Error("Couldn't delete the product. Please try again.");
         }
@@ -51,133 +54,113 @@ export default function ProductsPage() {
 
     if (ok) {
       toast.success(`${product.name} was deleted.`);
-      loadProducts();
+      router.push("/products");
     }
   }
 
   useEffect(() => {
-    loadProducts();
+    loadProduct();
   }, []);
+
+  if (loading) {
+    return (
+      <DashboardShell>
+        <LoadingState message="Loading product..." />
+      </DashboardShell>
+    );
+  }
+
+  if (!product) {
+    return (
+      <DashboardShell>
+        <EmptyState message="We couldn't find that product." />
+      </DashboardShell>
+    );
+  }
 
   return (
     <DashboardShell>
-      <div className="space-y-8">
+      <div className="space-y-10">
 
         {/* HEADER */}
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold text-[var(--foreground)]">
-            Products
-          </h1>
-
-          {can("manage:masterData") && (
-            <Button
-              variant="primary"
-              onClick={() => router.push("/products/create")}
+          <div className="flex items-center gap-3">
+            <button
+              className="p-2 rounded-lg transition-colors hover:bg-[var(--bg-hover)]"
+              onClick={() => router.push("/products")}
+              aria-label="Back to products"
             >
-              <Plus size={16} /> Add product
-            </Button>
-          )}
+              <ArrowLeft size={20} className="text-[var(--muted-foreground)]" />
+            </button>
+
+            <h1 className="text-2xl font-semibold text-[var(--foreground)]">
+              {product.name}
+            </h1>
+          </div>
+
+          <div className="flex gap-3">
+            {can("manage:masterData") && (
+              <Button
+                variant="primary"
+                onClick={() => router.push(`/products/${productId}/edit`)}
+              >
+                <Pencil size={16} /> Edit
+              </Button>
+            )}
+
+            {can("manage:masterData") && (
+              <Button variant="danger" onClick={deleteProduct}>
+                <Trash2 size={16} /> Delete
+              </Button>
+            )}
+          </div>
         </div>
 
-        {/* CONTENT */}
-        {loading ? (
-          <LoadingState message="Loading products..." />
-        ) : products.length === 0 ? (
-          <EmptyState message="No products yet. Use the Add product button to create your first one." />
-        ) : (
-          <div
-            className="
-              grid
-              grid-cols-1
-              sm:grid-cols-2
-              lg:grid-cols-3
-              xl:grid-cols-4
-              gap-6
-            "
-          >
-            {products.map((p) => (
-              <Card
-                key={p.id}
-                className="
-                  hover:border-[var(--ring)] hover:bg-[var(--bg-hover)]
-                  transition-all relative
-                  flex flex-col justify-between
-                "
-              >
-                {/* CLICKABLE CONTENT */}
-                <div
-                  className="flex flex-col flex-grow cursor-pointer"
-                  onClick={() => router.push(`/products/${p.id}`)}
-                >
-                  {/* IMAGE */}
-                  {p.imagePath ? (
-                    <img
-                      src={`${API_BASE_URL}${p.imagePath}`}
-                      alt={p.name}
-                      className="w-full h-36 object-cover rounded-lg mb-4"
-                    />
-                  ) : (
-                    <div
-                      className="
-                        w-full h-36 bg-[var(--muted)] rounded-lg mb-4
-                        flex items-center justify-center
-                        text-[var(--muted-foreground)] text-sm
-                      "
-                    >
-                      No image
-                    </div>
-                  )}
+        {/* MAIN CONTENT */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-                  {/* INFO */}
-                  <div className="space-y-1">
-                    <p className="font-semibold text-lg text-[var(--foreground)] mb-1">
-                      {p.name}
-                    </p>
-                    <p className="text-sm text-[var(--muted-foreground)]">
-                      Product code (SKU): {p.sku}
-                    </p>
-                    <p className="text-sm text-[var(--muted-foreground)]">
-                      Category: {p.category}
-                    </p>
-                    <p className="text-sm text-[var(--muted-foreground)]">
-                      Unit of measure (UOM): {p.uom}
-                    </p>
-                  </div>
-                </div>
+          {/* IMAGE BLOCK */}
+          <Card className="p-4 flex items-center justify-center h-72">
+            <ProductImage
+              imagePath={product.imagePath}
+              alt={product.name}
+              className="w-full h-full rounded-xl"
+              iconSize={40}
+            />
+          </Card>
 
-                {/* ACTIONS */}
-                <div className="flex justify-end gap-2 mt-4">
-                  {can("manage:masterData") && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        router.push(`/products/${p.id}/edit`);
-                      }}
-                    >
-                      <Pencil size={16} /> Edit
-                    </Button>
-                  )}
+          {/* DETAILS BLOCK */}
+          <Card className="p-8 lg:col-span-2">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-6">
+              Product details
+            </h2>
 
-                  {can("manage:masterData") && (
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteProduct(p);
-                      }}
-                    >
-                      <Trash2 size={16} /> Delete
-                    </Button>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
+            <div className="space-y-4 text-sm">
+              <DetailRow label="Name" value={product.name} />
+              <DetailRow label="Product code (SKU)" value={product.sku} />
+              <DetailRow label="Category" value={product.category} />
+              {product.brand && <DetailRow label="Brand" value={product.brand} />}
+              <DetailRow label="Unit of measure (UOM)" value={product.uom} />
+              <DetailRow
+                label="Low stock alert"
+                value={String(product.lowStockThreshold)}
+              />
+            </div>
+          </Card>
+        </div>
       </div>
     </DashboardShell>
+  );
+}
+
+/* Detail Row Component */
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex justify-between items-center border-b border-[var(--border)] pb-3">
+      <span className="text-sm text-[var(--muted-foreground)]">
+        {label}
+      </span>
+      <span className="font-semibold text-[var(--foreground)]">{value}</span>
+    </div>
   );
 }

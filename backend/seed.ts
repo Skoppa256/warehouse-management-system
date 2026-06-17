@@ -20,6 +20,10 @@
  * It is re-runnable: transactional tables are cleared first, master data is
  * upserted. Run with:  npm run seed
  *
+ * The dataset is intentionally scoped to what schema.prisma models today:
+ * products, batches, bins, inventory, movements and the inbound/outbound
+ * order flow — no variants, serials, kitting, contracts or returns.
+ *
  * Override behaviour with env vars:
  *   SEED_DAYS              number of days of movement history (default 90)
  *   SEED_PER_DAY_MAX       max movements per day              (default 4)
@@ -33,13 +37,6 @@ import {
   UOM,
   MovementType,
   LocationType,
-  BinRole,
-  HazardClass,
-  SerialStatus,
-  SerialEventType,
-  BomStatus,
-  WorkOrderType,
-  WorkOrderStatus,
   ReferenceType,
   OrderStatus,
   SalesOrderStatus,
@@ -238,20 +235,20 @@ const suppliers = [
 // Facility-operation catalogue: uniforms, cleaning supplies, communication
 // devices and ID accessories used by offices, malls, factories and hospitals.
 const products = [
-  { sku: 'SKU-001', name: 'Worker Uniform Shirt', category: 'Uniform', brand: 'NusaWear', uom: UOM.PCS, lowStockThreshold: 80, unitVolume: 0.004, unitWeight: 0.35 },
-  { sku: 'SKU-002', name: 'Worker Uniform Pants', category: 'Uniform', brand: 'NusaWear', uom: UOM.PCS, lowStockThreshold: 80, unitVolume: 0.005, unitWeight: 0.45 },
-  { sku: 'SKU-003', name: 'Reflective Safety Vest', category: 'PPE', brand: 'SafeLine', uom: UOM.PCS, lowStockThreshold: 60, unitVolume: 0.003, unitWeight: 0.2 },
-  { sku: 'SKU-004', name: 'Satpam Uniform Set', category: 'Security Uniform', brand: 'GuardPro', uom: UOM.BOX, lowStockThreshold: 25, unitVolume: 0.02, unitWeight: 1.8 },
-  { sku: 'SKU-005', name: 'Security Boots', category: 'PPE', brand: 'GuardPro', uom: UOM.PCS, lowStockThreshold: 30, unitVolume: 0.018, unitWeight: 1.4 },
-  { sku: 'SKU-006', name: 'Cleaner Uniform Set', category: 'Uniform', brand: 'CleanWear', uom: UOM.BOX, lowStockThreshold: 30, unitVolume: 0.018, unitWeight: 1.5 },
-  { sku: 'SKU-007', name: 'Mop Head Refill', category: 'Janitorial Tools', brand: 'CleanPro', uom: UOM.PCS, lowStockThreshold: 50, unitVolume: 0.01, unitWeight: 0.3 },
-  { sku: 'SKU-008', name: 'Microfiber Cloth Pack', category: 'Janitorial Tools', brand: 'CleanPro', uom: UOM.BOX, lowStockThreshold: 40, unitVolume: 0.012, unitWeight: 0.8 },
-  { sku: 'SKU-009', name: 'Floor Cleaner 5L', category: 'Cleaning Chemical', brand: 'ChemClean', uom: UOM.BOTTLE, lowStockThreshold: 35, unitVolume: 0.006, unitWeight: 5.2 },
-  { sku: 'SKU-010', name: 'Disinfectant 5L', category: 'Cleaning Chemical', brand: 'ChemClean', uom: UOM.BOTTLE, lowStockThreshold: 35, unitVolume: 0.006, unitWeight: 5.2 },
-  { sku: 'SKU-011', name: 'Glass Cleaner Spray 500ml', category: 'Cleaning Chemical', brand: 'ChemClean', uom: UOM.BOTTLE, lowStockThreshold: 45, unitVolume: 0.001, unitWeight: 0.55 },
-  { sku: 'SKU-012', name: 'Walkie Talkie Unit', category: 'Communication', brand: 'RadioLink', uom: UOM.PCS, lowStockThreshold: 20, unitVolume: 0.002, unitWeight: 0.28 },
-  { sku: 'SKU-013', name: 'Walkie Talkie Battery Pack', category: 'Communication', brand: 'RadioLink', uom: UOM.PCS, lowStockThreshold: 25, unitVolume: 0.001, unitWeight: 0.12 },
-  { sku: 'SKU-014', name: 'Printed Lanyard Pack', category: 'ID Accessories', brand: 'IDCraft', uom: UOM.BOX, lowStockThreshold: 60, unitVolume: 0.01, unitWeight: 0.6 },
+  { sku: 'SKU-001', name: 'Worker Uniform Shirt', category: 'Uniform', brand: 'NusaWear', uom: UOM.PCS, lowStockThreshold: 80 },
+  { sku: 'SKU-002', name: 'Worker Uniform Pants', category: 'Uniform', brand: 'NusaWear', uom: UOM.PCS, lowStockThreshold: 80 },
+  { sku: 'SKU-003', name: 'Reflective Safety Vest', category: 'PPE', brand: 'SafeLine', uom: UOM.PCS, lowStockThreshold: 60 },
+  { sku: 'SKU-004', name: 'Satpam Uniform Set', category: 'Security Uniform', brand: 'GuardPro', uom: UOM.BOX, lowStockThreshold: 25 },
+  { sku: 'SKU-005', name: 'Security Boots', category: 'PPE', brand: 'GuardPro', uom: UOM.PCS, lowStockThreshold: 30 },
+  { sku: 'SKU-006', name: 'Cleaner Uniform Set', category: 'Uniform', brand: 'CleanWear', uom: UOM.BOX, lowStockThreshold: 30 },
+  { sku: 'SKU-007', name: 'Mop Head Refill', category: 'Janitorial Tools', brand: 'CleanPro', uom: UOM.PCS, lowStockThreshold: 50 },
+  { sku: 'SKU-008', name: 'Microfiber Cloth Pack', category: 'Janitorial Tools', brand: 'CleanPro', uom: UOM.BOX, lowStockThreshold: 40 },
+  { sku: 'SKU-009', name: 'Floor Cleaner 5L', category: 'Cleaning Chemical', brand: 'ChemClean', uom: UOM.BOTTLE, lowStockThreshold: 35 },
+  { sku: 'SKU-010', name: 'Disinfectant 5L', category: 'Cleaning Chemical', brand: 'ChemClean', uom: UOM.BOTTLE, lowStockThreshold: 35 },
+  { sku: 'SKU-011', name: 'Glass Cleaner Spray 500ml', category: 'Cleaning Chemical', brand: 'ChemClean', uom: UOM.BOTTLE, lowStockThreshold: 45 },
+  { sku: 'SKU-012', name: 'Walkie Talkie Unit', category: 'Communication', brand: 'RadioLink', uom: UOM.PCS, lowStockThreshold: 20 },
+  { sku: 'SKU-013', name: 'Walkie Talkie Battery Pack', category: 'Communication', brand: 'RadioLink', uom: UOM.PCS, lowStockThreshold: 25 },
+  { sku: 'SKU-014', name: 'Printed Lanyard Pack', category: 'ID Accessories', brand: 'IDCraft', uom: UOM.BOX, lowStockThreshold: 60 },
 ];
 
 const customers = [
@@ -295,12 +292,13 @@ const CUSTOMER_IMAGE_FILES = [
   'Children\'s Hospital Colorado lobby from 4th floor.jpg',
 ];
 
-// Warehouse layout: each section expands into zone -> aisle -> rack -> level -> bin.
+// Warehouse layout: each section holds a handful of stock-bearing BIN
+// locations. Products are routed to the section matching their family.
 const sections = [
-  { code: 'UNIFORM', description: 'Uniform storage and pick faces' },
+  { code: 'UNIFORM', description: 'Uniform, PPE and janitorial storage' },
   { code: 'ID-ACCESS', description: 'ID accessories and high-count consumables' },
-  { code: 'ELECTRONICS', description: 'Communication devices and asset pool' },
-  { code: 'CHEM-STORE', description: 'Cleaning chemicals and controlled hazmat storage' },
+  { code: 'ELECTRONICS', description: 'Communication devices' },
+  { code: 'CHEM-STORE', description: 'Cleaning chemicals storage' },
 ];
 
 // ---------------------------------------------------------------------------
@@ -308,16 +306,6 @@ const sections = [
 async function clearTransactional() {
   // deepest children first to satisfy FK constraints
   await prisma.movementLock.deleteMany();
-  await prisma.washCycle.deleteMany();
-  await prisma.returnLine.deleteMany();
-  await prisma.return.deleteMany();
-  await prisma.contractLine.deleteMany();
-  await prisma.contract.deleteMany();
-  await prisma.workOrderComponent.deleteMany();
-  await prisma.workOrder.deleteMany();
-  await prisma.bomLine.deleteMany();
-  await prisma.billOfMaterials.deleteMany();
-  await prisma.serialUnitEvent.deleteMany();
   await prisma.stockMovement.deleteMany();
   await prisma.stockAdjustment.deleteMany();
   await prisma.shipmentLine.deleteMany();
@@ -329,12 +317,9 @@ async function clearTransactional() {
   await prisma.salesOrder.deleteMany();
   await prisma.purchaseOrder.deleteMany();
   await prisma.inventory.deleteMany();
-  await prisma.serialUnit.deleteMany();
-  await prisma.productVariant.deleteMany();
   await prisma.productBatch.deleteMany();
   await prisma.location.deleteMany();
   await prisma.section.deleteMany();
-  await prisma.warehouse.deleteMany();
 }
 
 async function main() {
@@ -380,60 +365,13 @@ async function main() {
   for (let i = 0; i < products.length; i++) {
     const p = products[i];
     const imagePath = await resolveImage('product', p.sku, PRODUCT_IMAGE_FILES[p.sku]);
-    // Phase 1 — the tracking grain each family forces.
-    const cat = p.category.toLowerCase();
-    const isChem = cat.includes('chemical');
-    const tracking = {
-      variantTracked: cat.includes('uniform'), // uniforms: color × size matrix
-      lotTracked: isChem, // chemicals: expiry / FEFO
-      serialTracked: cat.includes('communication'), // radios: asset lifecycle
-    };
-    // Phase 4 — chemical compliance. Flammable solvent-style vs corrosive cleaners.
-    const FLAMMABLE_SKUS = new Set(['SKU-011']); // glass cleaner (alcohol-based)
-    const compliance = isChem
-      ? {
-          hazardClass: FLAMMABLE_SKUS.has(p.sku)
-            ? HazardClass.FLAMMABLE
-            : HazardClass.CORROSIVE,
-          unNumber: FLAMMABLE_SKUS.has(p.sku) ? 'UN1993' : 'UN1760',
-          requiresSds: true,
-          sdsDocumentPath: `/uploads/sds/${p.sku}-sds.pdf`,
-          storageNotes: 'Store upright in a ventilated, hazard-rated bin.',
-        }
-      : {};
     productRecords.push(
       await prisma.product.upsert({
         where: { sku: p.sku },
-        update: { ...p, imagePath, ...tracking, ...compliance },
-        create: { ...p, imagePath, ...tracking, ...compliance },
+        update: { ...p, imagePath },
+        create: { ...p, imagePath },
       }),
     );
-  }
-
-  // --- Phase 1: variant matrix (color × size) for variant-tracked uniforms --
-  const variantConfigs: Record<string, { colors: string[]; sizes: string[] }> = {
-    'SKU-001': { colors: ['Navy', 'Grey'], sizes: ['S', 'M', 'L', 'XL'] },
-    'SKU-004': { colors: ['Black'], sizes: ['M', 'L', 'XL'] },
-    'SKU-006': { colors: ['Blue'], sizes: ['S', 'M', 'L'] },
-  };
-  let variantCount = 0;
-  for (const product of productRecords) {
-    const cfg = variantConfigs[product.sku];
-    if (!cfg) continue;
-    for (const color of cfg.colors) {
-      for (const size of cfg.sizes) {
-        await prisma.productVariant.create({
-          data: {
-            productId: product.id,
-            sku: `${product.sku}-${color.slice(0, 3).toUpperCase()}-${size}`,
-            name: `${product.name} ${color} ${size}`,
-            color,
-            size,
-          },
-        });
-        variantCount++;
-      }
-    }
   }
 
   const customerRecords: Customer[] = [];
@@ -457,255 +395,39 @@ async function main() {
       `${productRecords.length} products, ${customerRecords.length} customers (with images).`,
   );
 
-  // --- Warehouse + physical location tree --------------------------------
-  const warehouse = await prisma.warehouse.create({
-    data: {
-      code: 'MAIN',
-      name: 'Main Warehouse',
-      description: 'Single seeded warehouse for the facility-supply catalogue',
-    },
-  });
-
+  // --- Sections + stock-bearing BIN locations ----------------------------
   interface SeedLocationRecord {
     id: string;
     code: string;
     sectionId: string;
     family: string;
-    role: BinRole;
-    hazardClass: HazardClass;
   }
 
+  const BINS_PER_SECTION = 3;
   const locationRecords: SeedLocationRecord[] = [];
   for (const s of sections) {
     const section = await prisma.section.create({
-      data: {
-        code: s.code,
-        description: s.description,
-        warehouseId: warehouse.id,
-      },
+      data: { code: s.code, description: s.description },
     });
 
-    const zone = await prisma.location.create({
-      data: {
-        code: `${s.code}-Z01`,
-        type: LocationType.ZONE,
-        warehouseId: warehouse.id,
-        sectionId: section.id,
-        sequenceNo: 10,
-      },
-    });
-
-    const aisle = await prisma.location.create({
-      data: {
-        code: `${s.code}-A01`,
-        type: LocationType.AISLE,
-        warehouseId: warehouse.id,
-        sectionId: section.id,
-        parentId: zone.id,
-        sequenceNo: 20,
-      },
-    });
-
-    const rack = await prisma.location.create({
-      data: {
-        code: `${s.code}-R01`,
-        type: LocationType.RACK,
-        warehouseId: warehouse.id,
-        sectionId: section.id,
-        parentId: aisle.id,
-        sequenceNo: 30,
-      },
-    });
-
-    const level = await prisma.location.create({
-      data: {
-        code: `${s.code}-L01`,
-        type: LocationType.LEVEL,
-        warehouseId: warehouse.id,
-        sectionId: section.id,
-        parentId: rack.id,
-        sequenceNo: 40,
-      },
-    });
-
-    const binTemplates =
-      s.code === 'CHEM-STORE'
-        ? [
-            { role: BinRole.RECEIVING, hazardClass: HazardClass.CORROSIVE },
-            { role: BinRole.PICK_FACE, hazardClass: HazardClass.CORROSIVE },
-            { role: BinRole.RESERVE, hazardClass: HazardClass.FLAMMABLE },
-            { role: BinRole.QUARANTINE, hazardClass: HazardClass.CORROSIVE },
-          ]
-        : s.code === 'ELECTRONICS'
-          ? [
-              { role: BinRole.ASSET_POOL, hazardClass: HazardClass.NONE },
-              { role: BinRole.PICK_FACE, hazardClass: HazardClass.NONE },
-              { role: BinRole.QUARANTINE, hazardClass: HazardClass.NONE },
-            ]
-          : s.code === 'ID-ACCESS'
-            ? [
-                { role: BinRole.PICK_FACE, hazardClass: HazardClass.NONE },
-                { role: BinRole.RESERVE, hazardClass: HazardClass.NONE },
-                { role: BinRole.SHIPPING, hazardClass: HazardClass.NONE },
-              ]
-            : [
-                { role: BinRole.PICK_FACE, hazardClass: HazardClass.NONE },
-                { role: BinRole.RESERVE, hazardClass: HazardClass.NONE },
-                { role: BinRole.STAGING, hazardClass: HazardClass.NONE },
-              ];
-
-    for (let i = 0; i < binTemplates.length; i++) {
-      const template = binTemplates[i];
-      const isChemical = s.code === 'CHEM-STORE';
-      const isElectronics = s.code === 'ELECTRONICS';
+    for (let i = 0; i < BINS_PER_SECTION; i++) {
       const loc = await prisma.location.create({
         data: {
           code: `${s.code}-B${String(i + 1).padStart(2, '0')}`,
           type: LocationType.BIN,
-          warehouseId: warehouse.id,
           sectionId: section.id,
-          parentId: level.id,
-          x: i + 1,
-          y: sections.findIndex((sectionInfo) => sectionInfo.code === s.code) + 1,
-          sequenceNo: 100 + i,
-          role: template.role,
-          maxQty: isChemical ? 800 : isElectronics ? 300 : 700,
-          maxVolume: isChemical ? 250 : 400,
-          maxWeight: isChemical ? 500 : 250,
-          hazardClass: template.hazardClass,
-          oneSkuPerBin: false,
-          oneLotPerBin: isChemical,
-          allowHazmatWithNonHazmat: false,
-          allowedUoms: isChemical ? [UOM.BOTTLE] : [UOM.PCS, UOM.BOX],
         },
       });
-
       locationRecords.push({
         id: loc.id,
         code: loc.code,
         sectionId: section.id,
         family: s.code,
-        role: template.role,
-        hazardClass: template.hazardClass,
       });
     }
   }
   console.log(
-    `Created 1 warehouse, ${sections.length} sections, ` +
-      `${locationRecords.length} stock-bearing bins plus hierarchy nodes.`,
-  );
-
-  // --- Phase 1: serialized asset register for radios ----------------------
-  // Each walkie-talkie / battery pack is an individually tracked SerialUnit,
-  // parked IN_STOCK in the electronics asset pool.
-  const electronicsBins = locationRecords.filter((l) => l.family === 'ELECTRONICS');
-  const assetPoolBin =
-    electronicsBins.find((l) => l.role === BinRole.ASSET_POOL) ?? electronicsBins[0];
-  const serialUnits: { id: string; productId: string }[] = [];
-  for (const product of productRecords.filter((p) => p.serialTracked)) {
-    const units = product.sku === 'SKU-012' ? 24 : 16;
-    for (let n = 1; n <= units; n++) {
-      const su = await prisma.serialUnit.create({
-        data: {
-          serialNumber: `${product.sku}-SN-${String(n).padStart(4, '0')}`,
-          productId: product.id,
-          status: SerialStatus.IN_STOCK,
-          currentLocationId: assetPoolBin?.id ?? null,
-          batteryCycleCount: randInt(0, 200),
-          lastChargedAt: daysAgo(randInt(0, 14)),
-          warrantyExpiry: addMonths(NOW, randInt(6, 24)),
-        },
-      });
-      serialUnits.push({ id: su.id, productId: su.productId });
-    }
-  }
-
-  // --- Phase 2: drive a slice of the fleet through the asset lifecycle so the
-  // register shows ISSUED / IN_REPAIR / RETIRED units with event history. -----
-  let issued = 0;
-  let inRepair = 0;
-  let retired = 0;
-  for (let i = 0; i < serialUnits.length; i++) {
-    const su = serialUnits[i];
-    if (i % 5 === 1 && issued < 8 && customerRecords.length) {
-      const cust = customerRecords[issued % customerRecords.length];
-      const holder = `Field officer #${String(i + 1).padStart(3, '0')}`;
-      await prisma.serialUnit.update({
-        where: { id: su.id },
-        data: {
-          status: SerialStatus.ISSUED,
-          issuedToCustomerId: cust.id,
-          currentHolder: holder,
-          issuedAt: daysAgo(randInt(1, 40)),
-          currentLocationId: null,
-        },
-      });
-      await prisma.serialUnitEvent.create({
-        data: {
-          serialUnitId: su.id,
-          type: SerialEventType.ISSUE,
-          fromStatus: SerialStatus.IN_STOCK,
-          toStatus: SerialStatus.ISSUED,
-          customerId: cust.id,
-          holder,
-        },
-      });
-      await prisma.stockMovement.create({
-        data: {
-          type: MovementType.OUT,
-          quantity: 1,
-          productId: su.productId,
-          serialUnitId: su.id,
-          fromLocationId: assetPoolBin?.id ?? null,
-          referenceType: ReferenceType.ASSET_ISSUE,
-          referenceId: cust.id,
-          reason: 'Asset issued',
-        },
-      });
-      issued++;
-    } else if (i % 11 === 3 && inRepair < 3) {
-      await prisma.serialUnit.update({
-        where: { id: su.id },
-        data: {
-          status: SerialStatus.IN_REPAIR,
-          serviceable: false,
-          repairVendor: 'RadioLink Service Center',
-        },
-      });
-      await prisma.serialUnitEvent.create({
-        data: {
-          serialUnitId: su.id,
-          type: SerialEventType.SEND_TO_REPAIR,
-          fromStatus: SerialStatus.IN_STOCK,
-          toStatus: SerialStatus.IN_REPAIR,
-          notes: 'Intermittent transmit fault',
-        },
-      });
-      inRepair++;
-    } else if (i % 17 === 9 && retired < 2) {
-      await prisma.serialUnit.update({
-        where: { id: su.id },
-        data: {
-          status: SerialStatus.RETIRED,
-          serviceable: false,
-          currentLocationId: null,
-        },
-      });
-      await prisma.serialUnitEvent.create({
-        data: {
-          serialUnitId: su.id,
-          type: SerialEventType.RETIRE,
-          fromStatus: SerialStatus.IN_STOCK,
-          toStatus: SerialStatus.RETIRED,
-          notes: 'Beyond economic repair',
-        },
-      });
-      retired++;
-    }
-  }
-  console.log(
-    `Created ${variantCount} product variants, ${serialUnits.length} serialized units ` +
-      `(${issued} issued, ${inRepair} in repair, ${retired} retired).`,
+    `Created ${sections.length} sections and ${locationRecords.length} stock-bearing bins.`,
   );
 
   function binsForProduct(product: Product): SeedLocationRecord[] {
@@ -750,9 +472,8 @@ async function main() {
 
     for (let b = 0; b < expiryOffsets.length; b++) {
       const receivedAt = daysAgo(randInt(5, DAYS));
-      // Phase 1 — only lot-tracked families (chemicals) carry an expiry date;
-      // uniforms / radios / lanyards no longer get a fabricated one.
-      const expiryDate = product.lotTracked ? addMonths(NOW, expiryOffsets[b]) : null;
+      // Schema requires a non-null expiry on every batch.
+      const expiryDate = addMonths(NOW, expiryOffsets[b]);
       const batch = await prisma.productBatch.create({
         data: {
           batchNumber: `B-${product.sku}-${b + 1}`,
@@ -760,9 +481,7 @@ async function main() {
           expiryDate,
           receivedAt,
           notes:
-            product.lotTracked && b === 0 && expiryOffsets[b] <= 0
-              ? 'Check freshness before picking'
-              : null,
+            b === 0 && expiryOffsets[b] <= 0 ? 'Check freshness before picking' : null,
         },
       });
 
@@ -781,19 +500,6 @@ async function main() {
         },
       });
 
-      await prisma.location.update({
-        where: { id: location.id },
-        data: {
-          currentQty: { increment: quantity },
-          currentVolume: {
-            increment: quantity * (product.unitVolume ?? 0),
-          },
-          currentWeight: {
-            increment: quantity * (product.unitWeight ?? 0),
-          },
-        },
-      });
-
       batchInfos.push({
         id: batch.id,
         productId: product.id,
@@ -804,327 +510,6 @@ async function main() {
     }
   }
   console.log(`Created ${batchInfos.length} batches with inventory.`);
-
-  // --- Phase 3: kitting / BOM --------------------------------------------
-  // Define a "Security Onboarding Kit" (1 Satpam uniform variant + 1 lanyard +
-  // 1 issued radio), then run one assemble work order so the data shows a
-  // completed kit with full cross-grain component genealogy.
-  const satpam = productRecords.find((p) => p.sku === 'SKU-004');
-  const lanyard = productRecords.find((p) => p.sku === 'SKU-014');
-  const radio = productRecords.find((p) => p.sku === 'SKU-012');
-  const satpamVariant = await prisma.productVariant.findFirst({
-    where: { sku: 'SKU-004-BLA-L' },
-  });
-  const uniformBin =
-    locationRecords.find((l) => l.family === 'UNIFORM') ?? locationRecords[0];
-
-  if (satpam && lanyard && radio && satpamVariant && uniformBin) {
-    const KIT_QTY = 3;
-
-    const kit = await prisma.product.upsert({
-      where: { sku: 'KIT-SEC-01' },
-      update: { isKit: true },
-      create: {
-        sku: 'KIT-SEC-01',
-        name: 'Security Onboarding Kit',
-        category: 'Kit',
-        uom: UOM.BOX,
-        isKit: true,
-        lowStockThreshold: 5,
-      },
-    });
-
-    // Give the chosen Satpam variant its own on-hand stock so the kit consumes
-    // a real variant grain (seed inventory is otherwise plain-product).
-    const variantBatch = await prisma.productBatch.create({
-      data: {
-        batchNumber: 'B-SKU-004-VAR-BLA-L',
-        productId: satpam.id,
-        expiryDate: null,
-        notes: 'Variant stock for kitting demo',
-      },
-    });
-    const variantInv = await prisma.inventory.create({
-      data: {
-        productId: satpam.id,
-        productVariantId: satpamVariant.id,
-        batchId: variantBatch.id,
-        locationId: uniformBin.id,
-        quantity: 20,
-      },
-    });
-
-    const bom = await prisma.billOfMaterials.create({
-      data: {
-        kitProductId: kit.id,
-        version: 1,
-        name: 'Security Onboarding Kit v1',
-        status: BomStatus.ACTIVE,
-        effectiveFrom: NOW,
-      },
-    });
-    await prisma.bomLine.createMany({
-      data: [
-        {
-          bomId: bom.id,
-          componentProductId: satpam.id,
-          componentProductVariantId: satpamVariant.id,
-          quantity: 1,
-          sequence: 10,
-        },
-        { bomId: bom.id, componentProductId: lanyard.id, quantity: 1, sequence: 20 },
-        { bomId: bom.id, componentProductId: radio.id, quantity: 1, sequence: 30 },
-      ],
-    });
-
-    const wo = await prisma.workOrder.create({
-      data: {
-        number: 'WO-00001',
-        type: WorkOrderType.ASSEMBLE,
-        status: WorkOrderStatus.COMPLETED,
-        kitProductId: kit.id,
-        bomId: bom.id,
-        quantity: KIT_QTY,
-        locationId: uniformBin.id,
-        completedAt: NOW,
-        notes: 'Demo assembly seeded',
-      },
-    });
-
-    // Consume the variant uniform.
-    await prisma.inventory.update({
-      where: { id: variantInv.id },
-      data: { quantity: { decrement: KIT_QTY } },
-    });
-    await prisma.workOrderComponent.create({
-      data: {
-        workOrderId: wo.id,
-        componentProductId: satpam.id,
-        componentProductVariantId: satpamVariant.id,
-        batchId: variantBatch.id,
-        plannedQty: KIT_QTY,
-        consumedQty: KIT_QTY,
-        locationId: uniformBin.id,
-      },
-    });
-    await prisma.stockMovement.create({
-      data: {
-        type: MovementType.OUT,
-        quantity: KIT_QTY,
-        productId: satpam.id,
-        batchId: variantBatch.id,
-        inventoryId: variantInv.id,
-        fromLocationId: uniformBin.id,
-        referenceType: ReferenceType.KIT_ASSEMBLE,
-        referenceId: wo.id,
-        reason: 'Consumed into kit WO-00001',
-      },
-    });
-
-    // Consume the bulk lanyard.
-    const lanyardInv = await prisma.inventory.findFirst({
-      where: {
-        productId: lanyard.id,
-        productVariantId: null,
-        serialUnitId: null,
-        quantity: { gte: KIT_QTY },
-      },
-    });
-    if (lanyardInv) {
-      await prisma.inventory.update({
-        where: { id: lanyardInv.id },
-        data: { quantity: { decrement: KIT_QTY } },
-      });
-      await prisma.workOrderComponent.create({
-        data: {
-          workOrderId: wo.id,
-          componentProductId: lanyard.id,
-          batchId: lanyardInv.batchId,
-          plannedQty: KIT_QTY,
-          consumedQty: KIT_QTY,
-          locationId: lanyardInv.locationId,
-        },
-      });
-      await prisma.stockMovement.create({
-        data: {
-          type: MovementType.OUT,
-          quantity: KIT_QTY,
-          productId: lanyard.id,
-          batchId: lanyardInv.batchId,
-          inventoryId: lanyardInv.id,
-          fromLocationId: lanyardInv.locationId,
-          referenceType: ReferenceType.KIT_ASSEMBLE,
-          referenceId: wo.id,
-          reason: 'Consumed into kit WO-00001',
-        },
-      });
-    }
-
-    // Consume serialized radios (per-unit genealogy).
-    const radios = await prisma.serialUnit.findMany({
-      where: { productId: radio.id, status: SerialStatus.IN_STOCK, serviceable: true },
-      take: KIT_QTY,
-    });
-    for (const s of radios) {
-      await prisma.serialUnit.update({
-        where: { id: s.id },
-        data: {
-          status: SerialStatus.ISSUED,
-          currentHolder: 'Kit WO-00001',
-          currentLocationId: null,
-        },
-      });
-      await prisma.workOrderComponent.create({
-        data: {
-          workOrderId: wo.id,
-          componentProductId: radio.id,
-          serialUnitId: s.id,
-          plannedQty: 0,
-          consumedQty: 1,
-          locationId: s.currentLocationId,
-        },
-      });
-      await prisma.stockMovement.create({
-        data: {
-          type: MovementType.OUT,
-          quantity: 1,
-          productId: radio.id,
-          serialUnitId: s.id,
-          fromLocationId: s.currentLocationId,
-          referenceType: ReferenceType.KIT_ASSEMBLE,
-          referenceId: wo.id,
-          reason: 'Consumed into kit WO-00001',
-        },
-      });
-    }
-
-    // Produce the assembled kits as a fresh batch of stock.
-    const kitBatch = await prisma.productBatch.create({
-      data: {
-        batchNumber: 'KIT-WO-00001',
-        productId: kit.id,
-        expiryDate: null,
-        notes: 'Assembled by WO-00001',
-      },
-    });
-    const kitInv = await prisma.inventory.create({
-      data: {
-        productId: kit.id,
-        batchId: kitBatch.id,
-        locationId: uniformBin.id,
-        quantity: KIT_QTY,
-      },
-    });
-    await prisma.stockMovement.create({
-      data: {
-        type: MovementType.IN,
-        quantity: KIT_QTY,
-        productId: kit.id,
-        batchId: kitBatch.id,
-        inventoryId: kitInv.id,
-        toLocationId: uniformBin.id,
-        referenceType: ReferenceType.KIT_ASSEMBLE,
-        referenceId: wo.id,
-        reason: 'Assembled kit WO-00001',
-      },
-    });
-
-    console.log(
-      `Created kit "${kit.sku}" with a 3-line BOM and assembled ${KIT_QTY} units ` +
-        `(consumed 1 variant uniform + 1 lanyard + 1 radio each).`,
-    );
-
-    // --- Phase 6: a headcount-driven contract for the kit ------------------
-    const client = customerRecords[0];
-    if (client) {
-      const contract = await prisma.contract.create({
-        data: {
-          code: 'CTR-2026-001',
-          name: `${client.name} — Security Staffing 2026`,
-          customerId: client.id,
-          headcount: 50,
-          status: 'ACTIVE',
-          recurring: true,
-          notes: '50 guards: each needs one Security Onboarding Kit.',
-        },
-      });
-      await prisma.contractLine.create({
-        data: { contractId: contract.id, productId: kit.id, qtyPerHead: 1, fixedQty: 5 },
-      });
-      console.log(
-        `Created contract ${contract.code} (50 guards → 55 onboarding kits of demand).`,
-      );
-    }
-
-    // --- Phase 7: reverse logistics — returns across families -------------
-    const returnedRadio = await prisma.serialUnit.findFirst({
-      where: { status: SerialStatus.ISSUED, currentHolder: { startsWith: 'Field officer' } },
-    });
-    const quarantineBin = locationRecords.find(
-      (l) => l.family === 'CHEM-STORE' && l.role === BinRole.QUARANTINE,
-    );
-    const chem = productRecords.find((p) => p.sku === 'SKU-009');
-    const ret = await prisma.return.create({
-      data: {
-        number: 'RET-00001',
-        customerId: client?.id ?? null,
-        referenceType: ReferenceType.ASSET_ISSUE,
-        status: 'PROCESSED',
-        notes: 'Mixed return: radio to pool, uniforms to laundry, chemical to quarantine.',
-      },
-    });
-
-    // Radio → asset pool (back to IN_STOCK, serviceable).
-    if (returnedRadio) {
-      await prisma.serialUnit.update({
-        where: { id: returnedRadio.id },
-        data: { status: SerialStatus.IN_STOCK, serviceable: true, currentHolder: null, currentLocationId: assetPoolBin?.id ?? null, issuedToCustomerId: null, issuedAt: null },
-      });
-      await prisma.returnLine.create({
-        data: { returnId: ret.id, productId: returnedRadio.productId, serialUnitId: returnedRadio.id, quantity: 1, disposition: 'ASSET_POOL', toLocationId: assetPoolBin?.id ?? null, processedAt: NOW },
-      });
-      await prisma.serialUnitEvent.create({
-        data: { serialUnitId: returnedRadio.id, type: SerialEventType.RETURN, fromStatus: SerialStatus.ISSUED, toStatus: SerialStatus.IN_STOCK, toLocationId: assetPoolBin?.id ?? null, notes: 'Returned to asset pool via RET-00001' },
-      });
-    }
-
-    // Uniforms → laundry rotation, shown washed (READY) and back in the pick face.
-    const washLine = await prisma.returnLine.create({
-      data: { returnId: ret.id, productId: satpam.id, productVariantId: satpamVariant.id, quantity: 4, disposition: 'LAUNDRY', toLocationId: uniformBin.id, processedAt: NOW },
-    });
-    const washBatch = await prisma.productBatch.create({
-      data: { batchNumber: 'WASH-RET-00001', productId: satpam.id, expiryDate: null, notes: 'Laundered uniforms' },
-    });
-    const washInv = await prisma.inventory.create({
-      data: { productId: satpam.id, productVariantId: satpamVariant.id, batchId: washBatch.id, locationId: uniformBin.id, quantity: 4 },
-    });
-    await prisma.washCycle.create({
-      data: { productId: satpam.id, productVariantId: satpamVariant.id, quantity: 4, state: 'READY', returnLineId: washLine.id, locationId: uniformBin.id },
-    });
-    await prisma.stockMovement.create({
-      data: { type: MovementType.IN, quantity: 4, productId: satpam.id, batchId: washBatch.id, inventoryId: washInv.id, toLocationId: uniformBin.id, referenceType: ReferenceType.RETURN, referenceId: ret.id, reason: 'Washed uniforms returned to pick face' },
-    });
-
-    // Damaged chemical → quarantine bin.
-    if (chem && quarantineBin) {
-      const qBatch = await prisma.productBatch.create({
-        data: { batchNumber: 'RET-Q-SKU-009', productId: chem.id, expiryDate: null, notes: 'Returned for quarantine' },
-      });
-      const qInv = await prisma.inventory.create({
-        data: { productId: chem.id, batchId: qBatch.id, locationId: quarantineBin.id, quantity: 5 },
-      });
-      await prisma.returnLine.create({
-        data: { returnId: ret.id, productId: chem.id, batchId: qBatch.id, quantity: 5, disposition: 'QUARANTINE', toLocationId: quarantineBin.id, condition: 'Leaking container', processedAt: NOW },
-      });
-      await prisma.stockMovement.create({
-        data: { type: MovementType.IN, quantity: 5, productId: chem.id, batchId: qBatch.id, inventoryId: qInv.id, toLocationId: quarantineBin.id, referenceType: ReferenceType.RETURN, referenceId: ret.id, reason: 'Damaged chemical to quarantine' },
-      });
-    }
-
-    console.log(
-      'Created return RET-00001 (radio→pool, uniforms→laundry READY, chemical→quarantine).',
-    );
-  }
 
   // --- Stock movements ----------------------------------------------------
   const movements: any[] = [];
